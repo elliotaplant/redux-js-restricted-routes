@@ -12,7 +12,7 @@ function auth(state = { isAuthed: false }, action) {
     case LOG_OUT_USER:
       return {
         ...state,
-        isAuthed: true
+        isAuthed: false
       }
     default:
       return state

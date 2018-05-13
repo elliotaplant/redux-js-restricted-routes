@@ -67,17 +67,14 @@ const RestrictedRoute = ({ component: Component, restricted, redirectPath, ...re
 
 // Create route with auth restriction
 const RedirectLoginRoute = (props) => <RestrictedRoute redirectPath="/login" {...props}/>
-const mapStateToAuthProps = ({auth: {isAuthed}}) => {
-  console.log('isAuthed', isAuthed);
-  return ({ restricted: !isAuthed })
-};
-const AuthRestrictedRoute = withRouter(connect(mapStateToAuthProps)(RedirectLoginRoute));
+const mapStateToAuthProps = ({auth: {isAuthed}}) =>  ({ restricted: !isAuthed })
+const AuthRestrictedRoute = withRouter(connect(mapStateToAuthProps)(RedirectLoginRoute)); // why does this need withRouter
 
 const DeepRestrictedLoginRoute = props => <div><div><RedirectLoginRoute {...props} /></div></div>
 
 const RedirectProtectedRoute = (props) => <RestrictedRoute redirectPath="/protected" {...props}/>
 const mapStateToNoAuthProps = ({auth: {isAuthed}}) => ({ restricted: isAuthed });
-const NoAuthRestrictedRoute = connect(mapStateToNoAuthProps)(RedirectProtectedRoute);
+const NoAuthRestrictedRoute = withRouter(connect(mapStateToNoAuthProps)(RedirectProtectedRoute));
 
 // Button to log you in if you aren't
 const AuthButton = connect(({auth: {isAuthed}}) => ({ isAuthed }), { logOutUser })(({ isAuthed, logOutUser }) => (
@@ -99,9 +96,10 @@ export default function AuthExample () {
           <ul>
             <li><Link to="/public">Public Page</Link></li>
             <li><Link to="/protected">Protected Page</Link></li>
+            <li><Link to="/login">Login Page</Link></li>
           </ul>
           <Route path="/public" component={Public}/>
-          <Route path="/login" component={ConnectedLogin}/>
+          <NoAuthRestrictedRoute path="/login" component={ConnectedLogin}/>
           <AuthRestrictedRoute path="/protected" component={Protected} />
         </div>
       </Router>
