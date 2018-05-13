@@ -1,25 +1,18 @@
-import { createStore } from 'redux';
-import { combineReducers } from 'redux'
-import {
-  AUTH_USER,
-  LOG_OUT_USER,
-} from './actions'
+import {createStore} from 'redux';
+import {combineReducers} from 'redux'
+import {AUTH_USER, LOG_OUT_USER} from './actions'
 
-function authReducer(state = { isAuthed: false }, action) {
+function auth(state = { isAuthed: false }, action) {
   switch (action.type) {
     case AUTH_USER:
       return {
-          ...state,
-        {
-          isAuthed: true,
-        }
+        ...state,
+        isAuthed: true
       }
     case LOG_OUT_USER:
       return {
-          ...state,
-        {
-          isAuthed: true,
-        }
+        ...state,
+        isAuthed: true
       }
     default:
       return state
@@ -27,8 +20,10 @@ function authReducer(state = { isAuthed: false }, action) {
 }
 
 const appReducers = combineReducers({
-  authReducer,
+  auth,
   // ... your other reducers
 })
 
-const store = createStore(appReducers)
+const store = createStore(appReducers, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
+
+export default store
