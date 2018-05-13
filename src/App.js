@@ -38,7 +38,7 @@ class Login extends React.Component {
   }
 }
 
-const ConnectedLogin = connect(null, authUser)(Login)
+const ConnectedLogin = connect(null, { authUser })(Login)
 
 // Old private rout
 // const PrivateRoute = ({ component: Component, ...rest }) => (
@@ -67,8 +67,13 @@ const RestrictedRoute = ({ component: Component, restricted, redirectPath, ...re
 
 // Create route with auth restriction
 const RedirectLoginRoute = (props) => <RestrictedRoute redirectPath="/login" {...props}/>
-const mapStateToAuthProps = ({auth: {isAuthed}}) => ({ restricted: !isAuthed });
-const AuthRestrictedRoute = connect(mapStateToAuthProps)(RedirectLoginRoute);
+const mapStateToAuthProps = ({auth: {isAuthed}}) => {
+  console.log('isAuthed', isAuthed);
+  return ({ restricted: !isAuthed })
+};
+const AuthRestrictedRoute = withRouter(connect(mapStateToAuthProps)(RedirectLoginRoute));
+
+const DeepRestrictedLoginRoute = props => <div><div><RedirectLoginRoute {...props} /></div></div>
 
 const RedirectProtectedRoute = (props) => <RestrictedRoute redirectPath="/protected" {...props}/>
 const mapStateToNoAuthProps = ({auth: {isAuthed}}) => ({ restricted: isAuthed });
@@ -96,8 +101,8 @@ export default function AuthExample () {
             <li><Link to="/protected">Protected Page</Link></li>
           </ul>
           <Route path="/public" component={Public}/>
-          <Route path="/login" component={Login}/>
-          <RedirectLoginRoute restricted={true} path="/protected" component={Protected} />
+          <Route path="/login" component={ConnectedLogin}/>
+          <AuthRestrictedRoute path="/protected" component={Protected} />
         </div>
       </Router>
     </Provider>
