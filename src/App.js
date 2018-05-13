@@ -75,7 +75,7 @@ const mapStateToNoAuthProps = ({auth: {isAuthed}}) => ({ restricted: isAuthed })
 const NoAuthRestrictedRoute = connect(mapStateToNoAuthProps)(RedirectProtectedRoute);
 
 // Button to log you in if you aren't
-const AuthButton = connect(({auth: {isAuthed}}) => ({ isAuthed }), { logOutUser })(withRouter(({ history, isAuthed, logOutUser }) => (
+const AuthButton = connect(({auth: {isAuthed}}) => ({ isAuthed }), { logOutUser })(({ isAuthed, logOutUser }) => (
   isAuthed ? (
     <p>
       Welcome! <button onClick={logOutUser}>Sign out</button>
@@ -83,7 +83,7 @@ const AuthButton = connect(({auth: {isAuthed}}) => ({ isAuthed }), { logOutUser 
   ) : (
     <p>You are not logged in.</p>
   )
-)))
+))
 
 export default function AuthExample () {
   return (
@@ -97,7 +97,7 @@ export default function AuthExample () {
           </ul>
           <Route path="/public" component={Public}/>
           <Route path="/login" component={Login}/>
-          <RedirectLoginRoute  path="/protected" component={Protected} />
+          <RedirectLoginRoute restricted={true} path="/protected" component={Protected} />
         </div>
       </Router>
     </Provider>
