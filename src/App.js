@@ -7,6 +7,7 @@ import {
   withRouter
 } from 'react-router-dom'
 
+// Fake authentication that we dont need?
 const fakeAuth = {
   isAuthenticated: false,
   authenticate(cb) {
@@ -19,9 +20,11 @@ const fakeAuth = {
   }
 }
 
+// Pages to display
 const Public = () => <h3>Public</h3>
 const Protected = () => <h3>Protected</h3>
 
+// Login page that redirects to to history
 class Login extends React.Component {
   state = {
     redirectToReferrer: false
@@ -37,6 +40,7 @@ class Login extends React.Component {
     const { from } = this.props.location.state || { from: { pathname: '/' } }
     const { redirectToReferrer } = this.state
 
+    // Can we get referrer without this props stuff?
     if (redirectToReferrer === true) {
       return <Redirect to={from} />
     }
@@ -50,6 +54,7 @@ class Login extends React.Component {
   }
 }
 
+// Old private rout
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route {...rest} render={(props) => (
     fakeAuth.isAuthenticated === true
@@ -61,6 +66,29 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
   )} />
 )
 
+// New private route with restricted prop
+const RestrictedRoute = ({ component: Component, restricted, redirectPath, ...rest }) => (
+  <Route {...rest} render={(props) => (
+    restricted
+      ? <Component {...props} />
+      : <Redirect to={{
+          pathname: redirectPath,
+          state: { from: props.location }
+        }} />
+  )} />
+)
+
+
+// Create route with auth restriction
+const RedirectLoginRoute = (props) => <RestrictedRoute redirectPath="/login" {...props}/>
+const mapStateToAuthProps = (state) => ({ restricted: !state.isAuthed });
+const AuthRestrictedRoute = connect(mapStateToAuthProps)(RedirectLoginRoute);
+
+const RedirectProtectedRoute = (props) => <RestrictedRoute redirectPath="/protected" {...props}/>
+const mapStateToNoAuthProps = (state) => ({ restricted: state.isAuthed });
+const NoAuthRestrictedRoute = connect(mapStateToNoAuthProps)(RedirectProtectedRoute);
+
+// Button to log you in if you aren't
 const AuthButton = withRouter(({ history }) => (
   fakeAuth.isAuthenticated ? (
     <p>
@@ -83,8 +111,8 @@ export default function AuthExample () {
           <li><Link to="/protected">Protected Page</Link></li>
         </ul>
         <Route path="/public" component={Public}/>
-        <Route path="/login" component={Login}/>
-        <PrivateRoute path='/protected' component={Protected} />
+        <NoAuthRestrictedRoute path="/login" component={Login}/>
+        <AuthRestrictedRoute path='/protected' component={Protected} />
       </div>
     </Router>
   )
