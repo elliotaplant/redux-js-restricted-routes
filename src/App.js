@@ -1,14 +1,8 @@
 import React from 'react'
-import { connect, Provider } from 'react-redux'
-import {
-  BrowserRouter as Router,
-  Route,
-  Link,
-  Redirect,
-  withRouter
-} from 'react-router-dom'
+import {connect, Provider} from 'react-redux'
+import {BrowserRouter as Router, Route, Link, Redirect, withRouter} from 'react-router-dom'
 import store from './redux/store'
-import { authUser, logOutUser } from './redux/actions'
+import {authUser, logOutUser} from './redux/actions'
 
 // Pages to display
 const Public = () => <h3>Public</h3>
@@ -21,24 +15,26 @@ class Login extends React.Component {
   }
 
   render() {
-    const { from } = this.props.location.state || { from: { pathname: '/' } }
-    const { redirectToReferrer } = this.state
+    const {from} = this.props.location.state || {
+      from: {
+        pathname: '/'
+      }
+    }
+    const {redirectToReferrer} = this.state
 
     // Can we get referrer without this props stuff?
     if (redirectToReferrer === true) {
-      return <Redirect to={from} />
+      return <Redirect to={from}/>
     }
 
-    return (
-      <div>
-        <p>You must log in to view the page</p>
-        <button onClick={this.props.authUser}>Log in</button>
-      </div>
-    )
+    return (<div>
+      <p>You must log in to view the page</p>
+      <button onClick={this.props.authUser}>Log in</button>
+    </div>)
   }
 }
 
-const ConnectedLogin = connect(null, { authUser })(Login)
+const ConnectedLogin = connect(null, {authUser})(Login)
 
 // Old private rout
 // const PrivateRoute = ({ component: Component, ...rest }) => (
@@ -53,80 +49,81 @@ const ConnectedLogin = connect(null, { authUser })(Login)
 // )
 
 // New private route with restricted prop
-const RestrictedRoute = ({ component: Component, restricted, redirectPath, ...rest }) => {
-  // console.log('rest', rest);
-  // console.log('restricted', restricted);
-  // console.log('redirectPath', redirectPath);
-  // console.log('Component', Component.displayName);
-  return (
-  <Route {...rest} render={(props) => (
+const RestrictedRoute = ({
+  component: Component,
+  restricted,
+  redirectPath,
+  ...rest
+}) => (<Route {...rest} render={(props) => (
     restricted
-      ? <Redirect to={console.log('redirectPath', redirectPath) || {
-          pathname: redirectPath,
-          state: { from: props.location }
-        }} />
-      : <Component {...props} />
-  )} />
-)}
-
-const RestrictedSwitch = ({ match, component: Component, restricted, redirectPath, ...rest }) => {
-  console.log('redirectPath upper', redirectPath);
-  if (restricted) {
-    return <Redirect to={console.log('redirectPath', redirectPath) || {
+    ? <Redirect to={console.log('redirectPath', redirectPath) || {
         pathname: redirectPath,
-        state: { from: match.url }
-      }} />
-  }
-  return <Component {...rest} />
-}
+        state: {
+          from: props.location
+        }
+      }}/>
+    : <Component {...props}/>)}/>)
 
+const RestrictedSwitch = ({ match, component: Component, restricted, redirectPath, ...rest }) => (
+  restricted
+  ? <Redirect to={{ pathname: redirectPath, state: { from: match.url } }}/>
+  : <Component {...rest}/>
+)
 
 // Create route with auth restriction
 const RedirectLoginRoute = (props) => <RestrictedRoute redirectPath="/login" {...props}/>
-const mapStateToAuthProps = ({auth: {isAuthed}}) =>  ({ restricted: !isAuthed })
+const mapStateToAuthProps = ({auth: { isAuthed }}) => ({ restricted: !isAuthed })
 const AuthRestrictedRoute = withRouter(connect(mapStateToAuthProps)(RedirectLoginRoute)); // why does this need withRouter
 
-const DeepRestrictedLoginRoute = props => <div><div><RedirectLoginRoute {...props} /></div></div>
+const DeepRestrictedLoginRoute = props => <div>
+  <div><RedirectLoginRoute {...props}/></div>
+</div>
 
 const RedirectProtectedRoute = (props) => <RestrictedRoute redirectPath="/protected" {...props}/>
-const mapStateToNoAuthProps = ({auth: {isAuthed}}) => {
+const mapStateToNoAuthProps = ({auth: {
+    isAuthed
+  }}) => {
   console.log('mapping isAuthed', isAuthed);
-  return { restricted: isAuthed };
+  return {restricted: isAuthed};
 };
 
 const RedirectProtectedSwitch = (props) => <RestrictedSwitch redirectPath="/protected" {...props}/>
 const ConnectedNoAuthSwitch = connect(mapStateToNoAuthProps)(RedirectProtectedSwitch);
-const NoAuthRestrictedRoute = ({path, component: Component, ...rest}) => (
-  <Route path={path} {...rest} render={props => <ConnectedNoAuthSwitch component={Component} {...props} />} />
+const NoAuthRestrictedRoute = ({ path, component: Component, ...rest }) => (
+  <Route path={path} {...rest} render={props => <ConnectedNoAuthSwitch component={Component} {...props}/>}/>
 );
 
 // Button to log you in if you aren't
-const AuthButton = connect(({auth: {isAuthed}}) => ({ isAuthed }), { logOutUser })(({ isAuthed, logOutUser }) => (
-  isAuthed ? (
-    <p>
-      Welcome! <button onClick={logOutUser}>Sign out</button>
-    </p>
-  ) : (
-    <p>You are not logged in.</p>
-  )
-))
+const AuthButton = connect(({auth: {
+    isAuthed
+  }}) => ({isAuthed}), {logOutUser})(({isAuthed, logOutUser}) => (
+    isAuthed
+    ? (<p>
+      Welcome!
+      <button onClick={logOutUser}>Sign out</button>
+    </p>)
+    : (<p>You are not logged in.</p>)))
 
-export default function AuthExample () {
-  return (
-    <Provider store={store}>
-      <Router>
-        <div>
-          <AuthButton/>
-          <ul>
-            <li><Link to="/">Public Page</Link></li>
-            <li><Link to="/protected">Protected Page</Link></li>
-            <li><Link to="/login">Login Page</Link></li>
-          </ul>
-          <Route exact={true} path="/" component={Public}/>
-          <AuthRestrictedRoute path="/protected" component={Protected} />
-          <NoAuthRestrictedRoute path="/login" component={ConnectedLogin}/>
-        </div>
-      </Router>
-    </Provider>
-  )
+export default function AuthExample() {
+  return (<Provider store={store}>
+    <Router>
+      <div>
+        <AuthButton/>
+        <ul>
+          <li>
+            <Link to="/">Public Page</Link>
+          </li>
+          <li>
+            <Link to="/protected">Protected Page</Link>
+          </li>
+          <li>
+            <Link to="/login">Login Page</Link>
+          </li>
+        </ul>
+        <Route exact={true} path="/" component={Public}/>
+        <AuthRestrictedRoute path="/protected" component={Protected}/>
+        <NoAuthRestrictedRoute path="/login" component={ConnectedLogin}/>
+      </div>
+    </Router>
+  </Provider>)
 }
