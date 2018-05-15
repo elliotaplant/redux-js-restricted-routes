@@ -10,7 +10,7 @@ We want to make React components that act like React Router's `<Route />` compon
 
 By the end of the post, we'll be able to write JSX code like this:
 
-```jsx
+```javascript
 <Router>
   ...
   <AuthRestrictedRoute path="/protected" component={Protected}/>
@@ -144,3 +144,27 @@ Luckily for us, the `react-redux` npm package will do all the heavy lifting we n
 ```bash
 yarn add react-redux
 ```
+
+This package gives us the `Provider` component that lets components within our app access our store. Replace the contents of your `App` component with this simplified JSX:
+
+```javascript
+// src/App.js
+
+import React from 'react'
+import {Provider} from 'react-redux'
+import store from './redux/store'
+
+export default function App() {
+  return (
+    <Provider store={store}>
+      <h1>Hello World!</h1>
+    </Provider>
+  )
+}
+```
+
+Nothing magical is happening here, but if you go to your web browser you should see Hello world popping up:
+
+![Hello World!](https://i.imgur.com/SekaVmU.png)
+
+Now

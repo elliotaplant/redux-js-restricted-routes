@@ -4,6 +4,7 @@ import {compose} from 'redux'
 import {BrowserRouter as Router, Route, Link, Redirect} from 'react-router-dom'
 import store from './redux/store'
 import {logInUser, logOutUser} from './redux/actions'
+import {AuthIndicator} from './components/AuthIndicator'
 
 // Pages to display
 const Public = () => <h3>Public</h3>
@@ -61,33 +62,33 @@ const NoAuthRestrictedRoute = restrictedRouteMaker('/protected', mapStateToNoAut
 
 
 
-// Button to log you in if you aren't
-const mapAuthStateToProps = ({auth: { isAuthed }}) => ({isAuthed})
-const AuthButton = connect(mapAuthStateToProps, { logOutUser })(({ isAuthed, logOutUser }) => (
-    isAuthed
-      ? <p> Welcome! <button onClick={logOutUser}>Sign out</button></p>
-      : <p>You are not logged in.</p>
-  )
-)
 
-export default function AuthExample() {
-  return (<Provider store={store}>
-    <Router>
-      <div>
-        <AuthButton/>
-        <ul>
-          <li> <Link to="/">Public Page</Link> </li>
-          <li> <Link to="/protected">Protected Page</Link> </li>
-          <li> <Link to="/secret">Secret Page</Link> </li>
-          <li> <Link to="/login">Login Page</Link> </li>
-          <li> <Link to="/signup">Signup Page</Link> </li>
-        </ul>
-        <Route exact={true} path="/" component={Public}/>
-        <AuthRestrictedRoute path="/protected" component={Protected}/>
-        <AuthRestrictedRoute path="/secret" component={Secret}/>
-        <NoAuthRestrictedRoute path="/login" component={ConnectedLogin}/>
-        <NoAuthRestrictedRoute path="/signup" component={Signup}/>
-      </div>
-    </Router>
-  </Provider>)
+// export default function AuthExample() {
+//   return (<Provider store={store}>
+//     <Router>
+//       <div>
+//         <AuthButton/>
+//         <ul>
+//           <li> <Link to="/">Public Page</Link> </li>
+//           <li> <Link to="/protected">Protected Page</Link> </li>
+//           <li> <Link to="/secret">Secret Page</Link> </li>
+//           <li> <Link to="/login">Login Page</Link> </li>
+//           <li> <Link to="/signup">Signup Page</Link> </li>
+//         </ul>
+//         <Route exact={true} path="/" component={Public}/>
+//         <AuthRestrictedRoute path="/protected" component={Protected}/>
+//         <AuthRestrictedRoute path="/secret" component={Secret}/>
+//         <NoAuthRestrictedRoute path="/login" component={ConnectedLogin}/>
+//         <NoAuthRestrictedRoute path="/signup" component={Signup}/>
+//       </div>
+//     </Router>
+//   </Provider>)
+// }
+
+export default function App() {
+  return (
+    <Provider store={store}>
+      <h1>Hello World!</h1>
+    </Provider>
+  )
 }
