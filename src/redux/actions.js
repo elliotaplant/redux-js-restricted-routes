@@ -1,4 +1,4 @@
-// src/actions.js
+// src/redux/actions.js
 
 // Action Types
 export const LOG_IN_USER = 'LOG_IN_USER'

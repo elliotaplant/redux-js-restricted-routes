@@ -31,7 +31,7 @@ To learn the basics of Redux with React, take a read over [this tutorial](https:
 
 ## TL;DR
 
-The final code from this tutorial is available at the bottom of the page and on [my github](https://github.com/elliotaplant/redux-restricted-routes).
+The final code from this tutorial is available at the bottom of the page and on [my github](https://github.com/elliotaplant/redux-js-restricted-routes).
 
 ## Setup
 
@@ -50,17 +50,17 @@ If you see the default 'Create React App' screen in your web browser, you're on 
 
 ![Create React App default screen](https://i.imgur.com/zxmSYrX.png "Create React App default screen")
 
-## Adding Redux
+## Initializing Redux
 
 The first thing we'll add to our project is Redux to manage the logged in/out state. Go ahead and run
 ```bash
-yarn add redux react-redux
+yarn add redux
 ```
 
-Now lets create a file called `actions.js` in the `src` folder with two actions:
+In the `src` folder lets create a directory called `redux` and a file called `actions.js` in the new folder, then let's add these two action types to the `actions.js` file:
 
 ```javascript
-// src/actions.js
+// src/redux/actions.js
 
 // Action Types
 export const LOG_IN_USER = 'LOG_IN_USER'
@@ -71,9 +71,9 @@ Since the only state we care about is whether the user is logged in or not, thes
 
 /* REMOVE FOR NOW?
 
-To make things easier for our future selves, lets make some action creator functions to facilitate the logging in/out process and add them to the `src/actions.js` file:
+To make things easier for our future selves, lets make some action creator functions to facilitate the logging in/out process and add them to the `src/redux/actions.js` file:
 ```javascript
-// src/actions.js
+// src/redux/actions.js
 
 // ...
 
@@ -89,4 +89,58 @@ export function logOutUser() {
 
 */*
 
-Next, lets set our 
+In order to handle those actions, we'll need a reducer. Next to your `actions.js` file in `src/redux`, create a `reducers.js` file with this auth reducer:
+```javascript
+
+// src/redux/reducers.js
+
+import {LOG_IN_USER, LOG_OUT_USER} from './actions'
+
+// Reducer for handling auth actions
+export function authReducer(state = { isAuthed: false }, action) {
+  switch (action.type) {
+    case LOG_IN_USER:
+      return {
+        ...state,
+        isAuthed: true
+      }
+    case LOG_OUT_USER:
+      return {
+        ...state,
+        isAuthed: false
+      }
+    default:
+      return state
+  }
+}
+```
+
+All this reducer does is update the `isAuthed` part of our state when it sees the `LOG_IN_USER` and `LOG_OUT_USER` actions.
+
+Finally, lets use this reducer to make a store. Create a `store.js` file in the `src/redux` folder and initialize the store with our reducer.
+
+```javascript
+// src/redux/store.js
+
+import {combineReducers, createStore} from 'redux';
+import {authReducer} from './reducers'
+
+const reducers = combineReducers({
+  auth: authReducer,
+})
+
+const store = createStore(reducers)
+
+export default store
+```
+
+This file uses the `createStore` methods of redux to make a Redux store out of our auth reducer. Using `combineReducers` function is overkill here, but in your future apps, you'll probably have more than one reducer.
+
+We'll export this store so that we can connect it to redux with the `react-redux` package.
+
+## Connecting Redux to React
+
+Luckily for us, the `react-redux` npm package will do all the heavy lifting we need to make our React app aware of our Redux store. Add the package to your project by running:
+```bash
+yarn add react-redux
+```

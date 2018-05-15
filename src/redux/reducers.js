@@ -1,3 +1,5 @@
+// src/redux/reducers.js
+
 import {LOG_IN_USER, LOG_OUT_USER} from './actions'
 
 // Reducer for handling auth actions
