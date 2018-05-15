@@ -4,7 +4,7 @@ import {compose} from 'redux'
 import {BrowserRouter as Router, Route, Link, Redirect} from 'react-router-dom'
 import store from './redux/store'
 import {logInUser, logOutUser} from './redux/actions'
-import {AuthIndicator} from './components/AuthIndicator'
+import AuthIndicator from './components/AuthIndicator'
 
 // Pages to display
 const Public = () => <h3>Public</h3>
@@ -88,7 +88,7 @@ const NoAuthRestrictedRoute = restrictedRouteMaker('/protected', mapStateToNoAut
 export default function App() {
   return (
     <Provider store={store}>
-      <h1>Hello World!</h1>
+      <AuthIndicator />
     </Provider>
   )
 }

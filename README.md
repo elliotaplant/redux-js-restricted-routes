@@ -69,13 +69,13 @@ export const LOG_OUT_USER = 'LOG_OUT_USER'
 
 Since the only state we care about is whether the user is logged in or not, these are the only actions we need.
 
-/* REMOVE FOR NOW?
-
 To make things easier for our future selves, lets make some action creator functions to facilitate the logging in/out process and add them to the `src/redux/actions.js` file:
 ```javascript
 // src/redux/actions.js
 
-// ...
+// Action Types
+export const LOG_IN_USER = 'LOG_IN_USER'
+export const LOG_OUT_USER = 'LOG_OUT_USER'
 
 // Action Creators
 export function logInUser() {
@@ -86,8 +86,6 @@ export function logOutUser() {
 }
 
 ```
-
-*/*
 
 In order to handle those actions, we'll need a reducer. Next to your `actions.js` file in `src/redux`, create a `reducers.js` file with this auth reducer:
 ```javascript
@@ -167,4 +165,81 @@ Nothing magical is happening here, but if you go to your web browser you should 
 
 ![Hello World!](https://i.imgur.com/SekaVmU.png)
 
-Now
+Now lets get some indication of our logged in status. Make a `src/components` folder then create a file called `AuthIndicator.js` with this JSX component:
+
+```javascript
+// src/components/AuthIndicator.js
+
+import React from 'react'
+
+const AuthIndicator = ({isAuthed}) =>(
+  isAuthed
+    ? <p>Welcome! You are logged in</p>
+    : <p>You are not logged in. Please log in to view protected content</p>
+)
+```
+
+This component just takes one prop and tells us whether we are logged in or not. In order to connect this component to our Redux store, we use `react-redux`'s `connect` method, which can accept a `mapStateToProps` function. This function lets us decide how we want to tell our component about changes in the Redux store, and has the added benefit of preventing re-renders if the portion of state we pass to our component hasn't changed.
+
+```javascript
+// src/components/AuthIndicator.js
+
+import React from 'react'
+import {connect} from 'react-redux'
+
+const AuthIndicator = ({isAuthed}) =>(
+  isAuthed
+    ? <p>Welcome! You are logged in</p>
+    : <p>You are not logged in. Please log in to view protected content</p>
+)
+
+const mapAuthStateToProps = ({auth: { isAuthed }}) => ({isAuthed})
+
+export default connect(mapAuthStateToProps)(AuthIndicator)
+```
+
+Now that our AuthIndicator knows about our redux store, lets add it to the app:
+```javascript
+// src/App.js
+
+import React from 'react'
+import {Provider} from 'react-redux'
+import store from './redux/store'
+import AuthIndicator from './components/AuthIndicator'
+
+export default function App() {
+  return (
+    <Provider store={store}>
+      <AuthIndicator />
+    </Provider>
+  )
+}
+```
+
+Checking out our browser, we see a wonderful un-welcome message:
+
+![Unwelcome](https://i.imgur.com/y12Fvgf.png)
+
+Perfect! The app knows that we aren't logged in. Lets add a way to change that.
+
+Create a `src/components/AuthToggle.js` file to create a sign in/out button:
+```javascript
+// src/components/AuthToggle.js
+
+import React from 'react'
+import {connect} from 'react-redux'
+import {logInUser, logOutUser} from '../redux/actions'
+
+const AuthToggle = ({isAuthed, logInUser, logOutUser}) =>(
+  isAuthed
+    ? <button onClick={logOutUser}>Sign Out</button>
+    : <button onClick={logInUser}>Sign In</button>
+)
+
+const mapStateToProps = ({auth: {isAuthed}}) => ({isAuthed})
+const mapDispatchToProps = {logInUser, logOutUser}
+
+export default connect(mapStateToProps, mapDispatchToProps)(AuthToggle)
+```
+
+Note that the AuthToggle component is very similar to AuthIndicator, except that it accepts `logInUser` and `logOutUser` methods as props. These are the action creator methods we defined in our `actions.js` file. The `connect` method allows us to take these two action creators 
