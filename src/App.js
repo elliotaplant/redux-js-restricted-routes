@@ -3,7 +3,7 @@ import {connect, Provider} from 'react-redux'
 import {compose} from 'redux'
 import {BrowserRouter as Router, Route, Link, Redirect} from 'react-router-dom'
 import store from './redux/store'
-import {authUser, logOutUser} from './redux/actions'
+import {logInUser, logOutUser} from './redux/actions'
 
 // Pages to display
 const Public = () => <h3>Public</h3>
@@ -12,15 +12,15 @@ const Secret = () => <h3>Secret</h3>
 const Signup = () => <h3>Signup</h3>
 
 // Login page that redirects to to history
-const Login = ({ authUser }) => (
+const Login = ({ logInUser }) => (
   <div>
     <p>You must log in to view the page</p>
-    <button onClick={authUser}>Log in</button>
+    <button onClick={logInUser}>Log in</button>
   </div>
 )
 
 // Gives the login button ability to
-const ConnectedLogin = connect(null, { authUser })(Login)
+const ConnectedLogin = connect(null, { logInUser })(Login)
 
 // Either render the given component or redirect based on whether or not the component is restricted
 const RedirectSwitch = ({ match, component: Component, restricted, redirectPath, ...rest }) => (

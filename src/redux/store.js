@@ -1,10 +1,10 @@
 import {createStore} from 'redux';
 import {combineReducers} from 'redux'
-import {AUTH_USER, LOG_OUT_USER} from './actions'
+import {LOG_IN_USER, LOG_OUT_USER} from './actions'
 
 function auth(state = { isAuthed: false }, action) {
   switch (action.type) {
-    case AUTH_USER:
+    case LOG_IN_USER:
       return {
         ...state,
         isAuthed: true

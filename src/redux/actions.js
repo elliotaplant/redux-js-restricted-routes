@@ -1,17 +1,12 @@
-/*
- * action types
- */
+// src/actions.js
 
-export const AUTH_USER = 'AUTH_USER'
+// Action Types
+export const LOG_IN_USER = 'LOG_IN_USER'
 export const LOG_OUT_USER = 'LOG_OUT_USER'
-// ...your other action types
 
-/*
- * action creators
- */
-
-export function authUser() {
-  return { type: AUTH_USER }
+// Action Creators
+export function logInUser() {
+  return { type: LOG_IN_USER }
 }
 
 export function logOutUser() {

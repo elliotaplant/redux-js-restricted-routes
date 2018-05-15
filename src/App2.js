@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import {connect, Provider} from 'react-redux'
 import store from './redux/store'
 import {Redirect, BrowserRouter as Router, Route, Link} from 'react-router-dom'
-import {authUser, logOutUser} from './redux/actions'
+import {logInUser, logOutUser} from './redux/actions'
 
 const topics = [
   {
@@ -59,12 +59,12 @@ const topics = [
   }
 ]
 // Login page that redirects to to history
-const Login = ({ authUser }) => (<div>
+const Login = ({ logInUser }) => (<div>
   <p>You must log in to view the page</p>
-  <button onClick={authUser}>Log in</button>
+  <button onClick={logInUser}>Log in</button>
 </div>)
 
-const ConnectedLogin = connect(null, {authUser})(Login)
+const ConnectedLogin = connect(null, {logInUser})(Login)
 
 function Resource({match, isAuthed}) {
   const topic = topics.find(({id}) => id === match.params.topicId).resources.find(({id}) => id === match.params.subId)
