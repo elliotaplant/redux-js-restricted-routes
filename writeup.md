@@ -69,6 +69,8 @@ export const LOG_OUT_USER = 'LOG_OUT_USER'
 
 Since the only state we care about is whether the user is logged in or not, these are the only actions we need.
 
+/* REMOVE FOR NOW?
+
 To make things easier for our future selves, lets make some action creator functions to facilitate the logging in/out process and add them to the `src/actions.js` file:
 ```javascript
 // src/actions.js
@@ -79,9 +81,12 @@ To make things easier for our future selves, lets make some action creator funct
 export function logInUser() {
   return { type: LOG_IN_USER }
 }
-
 export function logOutUser() {
   return { type: LOG_OUT_USER }
 }
 
 ```
+
+*/*
+
+Next, lets set our 
