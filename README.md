@@ -155,7 +155,9 @@ import store from './redux/store'
 export default function App() {
   return (
     <Provider store={store}>
-      <h1>Hello World!</h1>
+      <div style={{ padding: '20px' }}>
+        <h1>Hello World!</h1>
+      </div>
     </Provider>
   )
 }
@@ -210,7 +212,9 @@ import AuthIndicator from './components/AuthIndicator'
 export default function App() {
   return (
     <Provider store={store}>
-      <AuthIndicator />
+      <div style={{ padding: '20px' }}>
+        <AuthIndicator />
+      </div>
     </Provider>
   )
 }
@@ -222,15 +226,15 @@ Checking out our browser, we see a wonderful un-welcome message:
 
 Perfect! The app knows that we aren't logged in. Lets add a way to change that.
 
-Create a `src/components/AuthToggle.js` file to create a sign in/out button:
+Create a `src/components/AuthButton.js` file to create a sign in/out button:
 ```javascript
-// src/components/AuthToggle.js
+// src/components/AuthButton.js
 
 import React from 'react'
 import {connect} from 'react-redux'
 import {logInUser, logOutUser} from '../redux/actions'
 
-const AuthToggle = ({isAuthed, logInUser, logOutUser}) =>(
+const AuthButton = ({isAuthed, logInUser, logOutUser}) =>(
   isAuthed
     ? <button onClick={logOutUser}>Sign Out</button>
     : <button onClick={logInUser}>Sign In</button>
@@ -239,7 +243,35 @@ const AuthToggle = ({isAuthed, logInUser, logOutUser}) =>(
 const mapStateToProps = ({auth: {isAuthed}}) => ({isAuthed})
 const mapDispatchToProps = {logInUser, logOutUser}
 
-export default connect(mapStateToProps, mapDispatchToProps)(AuthToggle)
+export default connect(mapStateToProps, mapDispatchToProps)(AuthButton)
 ```
 
-Note that the AuthToggle component is very similar to AuthIndicator, except that it accepts `logInUser` and `logOutUser` methods as props. These are the action creator methods we defined in our `actions.js` file. The `connect` method allows us to take these two action creators 
+Note that the AuthButton component is very similar to AuthIndicator, except that it accepts two additional `logInUser` and `logOutUser` methods as props. These are the action creator methods we defined in our `actions.js` file. The `connect` method allows us to pass these two methods into our component's props with the `mapDispatchToProps` parameter.
+
+Lets add our new AuthButton to our App in `/src/App.js`:
+
+```javascript
+// src/App.js
+
+import React from 'react'
+import {Provider} from 'react-redux'
+import store from './redux/store'
+import AuthIndicator from './components/AuthIndicator'
+import AuthButton from './components/AuthButton'
+
+export default function App() {
+  return (
+    <Provider store={store}>
+      <div style={{ padding: '20px' }}>
+        <AuthIndicator />
+        <AuthButton />
+      </div>
+    </Provider>
+  )
+}
+```
+Now head to your web browser and see if our authentication is working:
+
+![Sign In / Sign Out](https://media.giphy.com/media/fituC7bTjxHyOkSSFe/giphy.gif)
+
+Awesome! Our AuthIndicator is showing us whether or not we are logged in, and our AuthButton lets us log in and log out. In a real app, this sign in process would probably involve verifying a token with your server, but this simplified version is enough for our routing purposes.
