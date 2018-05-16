@@ -50,6 +50,51 @@ If you see the default 'Create React App' screen in your web browser, you're on 
 
 ![Create React App default screen](https://i.imgur.com/zxmSYrX.png "Create React App default screen")
 
+## Lets Route!
+
+Now it's time to add in some routes. Lets use yarn to add `react-router-dom`:
+```bash
+yarn add react-router-dom
+```
+This package handles routing for browser projects, but most of the code we use here today will apply to React Native or React VR projects.
+
+To use the router, we'll need to provide the `BrowserRouter` (as `Router`) component from `react-router` at the root of our app. We'll set up our two pages using the `Route` component, and add `Links` to navigate to both routes. Go ahead and replace the contents of `src/App.js` with a basic routing component:
+
+```javascript
+// src/App.js
+
+import React from 'react'
+import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
+
+export default function App() {
+  return (
+    <Router>
+      <div style={{ padding: '20px' }}>
+        <ul>
+          <li><Link to="/login">Login Page</Link></li>
+          <li><Link to="/logout">Logout Page</Link></li>
+        </ul>
+        <Route path="/login" component={() => <h3>Login</h3>)}/>
+        <Route path="/logout" component={() => <h3>Logout</h3>}/>
+      </div>
+    </Router>
+  )
+}
+```
+
+Lets create a file and make a basic Login page in a `src/components/Login.js` file:
+
+```javascript
+// src/components/pages.js
+
+import React from 'react'
+
+export const Public = () => <h3>Public</h3>
+export const Protected = () => <h3>Protected</h3>
+```
+
+To use the router, we'll need to provide the `BrowserRouter` (as `Router`) component from `react-router` at the root of our app. We'll set up our two pages using the `Route` component, and add `Links` to navigate to both routes.
+
 ## Initializing Redux
 
 The first thing we'll add to our project is Redux to manage the logged in/out state. Go ahead and run

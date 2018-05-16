@@ -24,7 +24,6 @@ export default function App() {
       <Router>
         <div style={{ padding: '20px' }}>
           <AuthIndicator />
-          <AuthButton />
           <ul>
             <li><Link to="/login">Login Page</Link></li>
             <li><Link to="/logout">Logout Page</Link></li>
