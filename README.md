@@ -501,6 +501,7 @@ const restrictedRouteMaker = (redirectPath, mapStateToRestricted) => compose(
   addRedirectPathToSwitch
 )(redirectPath)
 ```
+Note that the `redirectPath` gets passed to the compose on the outside because we need to pass it to `addRedirectPathToSwitch` to trigger the composition.
 
 Here's the entire `restrictedRouteMaker.js` file:
 
@@ -536,3 +537,25 @@ export default (redirectPath, mapStateToRestricted) => compose(
   addRedirectPathToSwitch
 )(redirectPath)
 ```
+
+## Using Our Route Factory
+
+Now we can use our route factory to make some restricted routes! Back in App.js, lets make two restricted routes, one for authed routes and one for non-authed routes:
+```javascript
+// src/App.js
+
+// ...
+import {restrictedRouteMaker} from './restrictedRouteMaker'
+
+// Create route with auth restriction
+const mapStateToAuthProps = ({auth: { isAuthed }}) => ({ restricted: !isAuthed })
+const AuthRestrictedRoute = restrictedRouteMaker('/login', mapStateToAuthProps);
+
+// Create route with no-auth restriction
+const mapStateToNoAuthProps = ({auth: { isAuthed }}) => ({ restricted: isAuthed })
+const NoAuthRestrictedRoute = restrictedRouteMaker('/protected', mapStateToNoAuthProps);
+
+// ...
+```
+
+Now, lets plug the

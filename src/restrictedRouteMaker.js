@@ -1,7 +1,7 @@
 // src/restrictedRouteMaker.js
 
 import React from 'react'
-import {connect, Provider} from 'react-redux'
+import {connect} from 'react-redux'
 import {compose} from 'redux'
 import {Route, Redirect} from 'react-router-dom'
 
@@ -23,7 +23,7 @@ const makeSwitchRoute = (SwitchComponent) => ({ path, component: RenderComponent
 )
 
 // Wraps all our other components in a HOC factory function
-export default restrictedRouteMaker = (redirectPath, mapStateToRestricted) => compose(
+export default (redirectPath, mapStateToRestricted) => compose(
   makeSwitchRoute,
   connect(mapStateToRestricted),
   addRedirectPathToSwitch
