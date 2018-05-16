@@ -45,7 +45,7 @@ cd redux-restricted-routes
 If you haven't used `create-react-app` before, install it with `npm install -g create-react-app`.
 
 Once we're in the project, we should be able to run
-```
+```bash
 yarn start
 ```
 If you see the default 'Create React App' screen in your web browser, you're on the right track!
@@ -145,12 +145,10 @@ export function logInUser() {
 export function logOutUser() {
   return { type: LOG_OUT_USER }
 }
-
 ```
 
 In order to handle those actions, we'll need a reducer. Next to your `actions.js` file in `src/redux`, create a `reducers.js` file with this auth reducer:
 ```javascript
-
 // src/redux/reducers.js
 
 import {LOG_IN_USER, LOG_OUT_USER} from './actions'
