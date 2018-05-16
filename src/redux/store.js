@@ -1,6 +1,6 @@
 // src/redux/store.js
 
-import {combineReducers, createStore} from 'redux';
+import {combineReducers, createStore} from 'redux'
 import {authReducer} from './reducers'
 
 const reducers = combineReducers({

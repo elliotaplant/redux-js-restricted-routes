@@ -11,11 +11,11 @@ import restrictedRouteMaker from './restrictedRouteMaker'
 
 // Create route with auth restriction
 const mapStateToAuthProps = ({auth: { isAuthed }}) => ({ restricted: !isAuthed })
-const AuthRestrictedRoute = restrictedRouteMaker('/login', mapStateToAuthProps);
+const AuthRestrictedRoute = restrictedRouteMaker('/login', mapStateToAuthProps)
 
 // Create route with no-auth restriction
 const mapStateToNoAuthProps = ({auth: { isAuthed }}) => ({ restricted: isAuthed })
-const NoAuthRestrictedRoute = restrictedRouteMaker('/protected', mapStateToNoAuthProps);
+const NoAuthRestrictedRoute = restrictedRouteMaker('/protected', mapStateToNoAuthProps)
 
 export default function App() {
   return (

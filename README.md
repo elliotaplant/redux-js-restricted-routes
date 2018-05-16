@@ -159,7 +159,7 @@ Finally, let's use this reducer to make a store. Create a `store.js` file in the
 ```javascript
 // src/redux/store.js
 
-import {combineReducers, createStore} from 'redux';
+import {combineReducers, createStore} from 'redux'
 import {authReducer} from './reducers'
 
 const reducers = combineReducers({
@@ -356,7 +356,7 @@ const addRedirectPathToSwitch = (redirectPath) => (props) => (
 The output of this HOC gives a `RedirectSwitch` that always redirects to the same place. For example, we could make a `LoginRestrictedSwitch` component that redirects to `/login` like this:
 
 ```javascript
-const LoginRedirectSwitch = addRedirectPathToSwitch('/login');
+const LoginRedirectSwitch = addRedirectPathToSwitch('/login')
 ```
 
 Next, let's use `connect` to calculate our `restricted` prop from our state. We need to make a `mapStateToProps` function, so using our `LoginRedirectSwitch` as an example, we could do:
@@ -409,12 +409,12 @@ We can work our way from `RedirectSwitch` to `AuthRestrictedRoute` with each of 
 
 ```javascript
 const restrictedRouteMaker = () => {
-  const LoginRedirectSwitch = addRedirectPathToSwitch('/login');
+  const LoginRedirectSwitch = addRedirectPathToSwitch('/login')
   const mapStateToProps = ({auth: { isAuthed }}) => ({ restricted: isAuthed })
   const ConnectedLoginRedirectSwitch = connect(mapStateToProps)(LoginRedirectSwitch)
   const AuthRestrictedRoute = makeSwitchRoute(ConnectedLoginRedirectSwitch)
 
-  return AuthRestrictedRoute;
+  return AuthRestrictedRoute
 }
 ```
 This would work if we only wanted to make the `AuthRestrictedRoute` component, but we're interested in generalizing the process.
@@ -423,12 +423,12 @@ There are really only two values that we need to get before we can make any `*Re
 
 ```javascript
 const restrictedRouteMaker = (redirectPath, mapStateToRestricted) => {
-  const LoginRedirectSwitch = addRedirectPathToSwitch('/login');
+  const LoginRedirectSwitch = addRedirectPathToSwitch('/login')
   const mapStateToProps = ({auth: { isAuthed }}) => ({ restricted: isAuthed })
   const ConnectedLoginRedirectSwitch = connect(mapStateToProps)(LoginRedirectSwitch)
   const AuthRestrictedRoute = makeSwitchRoute(ConnectedLoginRedirectSwitch)
 
-  return AuthRestrictedRoute;
+  return AuthRestrictedRoute
 }
 ```
 
@@ -436,7 +436,7 @@ Now, let's use those parameters to make a generalized `restrictedRouteMaker`:
 
 ```javascript
 const restrictedRouteMaker = (redirectPath, mapStateToRestricted) => {
-  const RedirectSwitchWithPath = addRedirectPathToSwitch(redirectPath);
+  const RedirectSwitchWithPath = addRedirectPathToSwitch(redirectPath)
   const ConnectedRedirectSwitchWithPath = connect(mapStateToRestricted)(RedirectSwitchWithPath)
   return makeSwitchRoute(ConnectedRedirectSwitchWithPath)
 }
@@ -518,60 +518,26 @@ export default (redirectPath, mapStateToRestricted) => compose(
 
 Now we can use our route factory to make some restricted routes! Back in App.js, let's make two restricted routes, one for authed routes and one for non-authed routes:
 ```javascript
-// src/App.js
-
-// ...
-import {restrictedRouteMaker} from './restrictedRouteMaker'
-
-// Create route with auth restriction
-const mapStateToAuthProps = ({auth: { isAuthed }}) => ({ restricted: !isAuthed })
-const AuthRestrictedRoute = restrictedRouteMaker('/login', mapStateToAuthProps);
-
-// Create route with no-auth restriction
-const mapStateToNoAuthProps = ({auth: { isAuthed }}) => ({ restricted: isAuthed })
-const NoAuthRestrictedRoute = restrictedRouteMaker('/protected', mapStateToNoAuthProps);
-
-// ...
+// TODO: Add code (top)
 ```
 
-Now, let's use our routes to fix the permissions on our `Login` and `Logout` pages:
+Now, let's use our routes to fix the permissions on our `Login`, `Protected` and `Logout` pages:
 ```javascript
-// src/App.js
-
-// ...
-
-export default function App() {
-  return (
-    <Provider store={store}>
-      <Router>
-        <div style={{ padding: '20px' }}>
-          <AuthIndicator />
-          <ul>
-            <li><Link to="/login">Login Page</Link></li>
-            <li><Link to="/logout">Logout Page</Link></li>
-          </ul>
-          <NoAuthRestrictedRoute path="/login" component={Login}/>
-          <AuthRestrictedRoute path="/logout" component={Logout}/>
-        </div>
-      </Router>
-    </Provider>
-  )
-}
+// TODO: Add code (bottom)
 ```
 
+If we head over to the browser we'll see that if we try to go to the `Protected` or `Logout` pages before logging in, we get redirected to the `Login` page! And conversely, if we try to go to the `Login` page when we're already logged in, we get redirected to the `Home` page. Sweet.
 
+// TODO: Make video of trying to navigate with/without logins
 
+## Conclusion
 
----
-
-
-Lets create a file and make a few basic components in a `src/components/pages.js` file to use with our router:
-
+By making a Higher Order Component that connects our routes to our redux store, we're able to restrict access to parts of our app based on our redux state. As we just saw, this is super useful for authentication, but it can easily be extended to other restrictions. What if you want to make a route restricted if a user hasn't complimented your hair? Thats as simple as:
 ```javascript
-// src/components/pages.js
-
-import React from 'react'
-
-export const Public = () => <h3>Public</h3>
-export const Protected = () => <h3>Protected</h3>
+const mapStateToComplimentProps = ({user: { hasComplimentedMyHair }}) => ({ restricted: !hasComplimentedMyHair })
+const HairComplimentRestrictedRoute = restrictedRouteMaker('/not-fabulous', mapStateToComplimentProps)
+// ...
+  <HairComplimentRestrictedRoute path="/fabulous" component={SuperMegaDiscount} />
+// ...
 ```
+The possibilities are endless. Now go restrict your users with confidence!
