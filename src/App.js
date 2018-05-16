@@ -6,12 +6,7 @@ import store from './redux/store'
 import {logInUser, logOutUser} from './redux/actions'
 import AuthIndicator from './components/AuthIndicator'
 import AuthButton from './components/AuthButton'
-
-// Pages to display
-const Public = () => <h3>Public</h3>
-const Protected = () => <h3>Protected</h3>
-const Secret = () => <h3>Secret</h3>
-const Signup = () => <h3>Signup</h3>
+import {Public, Protected} from './components/pages'
 
 // Login page that redirects to to history
 const Login = ({ logInUser }) => (
@@ -23,30 +18,6 @@ const Login = ({ logInUser }) => (
 
 // Gives the login button ability to
 const ConnectedLogin = connect(null, { logInUser })(Login)
-
-// Either render the given component or redirect based on whether or not the component is restricted
-const RedirectSwitch = ({ match, component: Component, restricted, redirectPath, ...rest }) => (
-  restricted
-    ? <Redirect to={{ pathname: redirectPath, state: { from: match.url } }}/>
-    : <Component {...rest}/>
-)
-
-
-// Component factory function to
-const makeSwitchRoute = (SwitchComponent) => ({ path, component: RenderComponent, ...rest }) => (
-  <Route path={path} {...rest} render={props => <SwitchComponent component={RenderComponent} {...props}/>}/>
-)
-// Add redirectPath prop to our switch
-const addRedirectPathToSwitch = (redirectPath) => (props) => <RedirectSwitch redirectPath={redirectPath} {...props}/>
-// Factory solution
-// const restrictedRouteMaker = (redirectPath, mapStateToRestricted) =>
-//   makeSwitchRoute(connect(mapStateToRestricted)(addRedirectPathToSwitch(redirectPath)))
-// Factory solution with compose
-const restrictedRouteMaker = (redirectPath, mapStateToRestricted) => compose(
-  makeSwitchRoute,
-  connect(mapStateToRestricted),
-  addRedirectPathToSwitch
-)(redirectPath)
 
 // Create route with auth restriction
 const RedirectLoginSwitch = (props) => <RedirectSwitch redirectPath="/login" {...props}/>
@@ -89,10 +60,18 @@ const NoAuthRestrictedRoute = restrictedRouteMaker('/protected', mapStateToNoAut
 export default function App() {
   return (
     <Provider store={store}>
-      <div style={{ padding: '20px' }}>
-        <AuthIndicator />
-        <AuthButton />
-      </div>
+      <Router>
+        <div style={{ padding: '20px' }}>
+          <AuthIndicator />
+          <AuthButton />
+          <ul>
+            <li><Link to="/public">Public Page</Link></li>
+            <li><Link to="/protected">Protected Page</Link></li>
+          </ul>
+          <Route path="/public" component={Public}/>
+          <Route path="/protected" component={Protected}/>
+        </div>
+      </Router>
     </Provider>
   )
 }

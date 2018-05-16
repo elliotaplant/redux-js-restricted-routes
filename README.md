@@ -25,7 +25,7 @@ Where the `Protected` component located at `/protected` in `<AuthRestrictedRoute
 
 To get the most out of this tutorial, you should have some basic familiarity with React, Redux, and React Router v4.
 
-React Training has an example of [authentication with React Router v4](https://reacttraining.com/react-router/web/example/auth-workflow), but I highly recommend checking out [Tyler McGinnis's tutorial](https://tylermcginnis.com/react-router-protected-routes-authentication/) on building that example. His video is especially helpful, and we'll start about where his tutorial leaves off.
+React Training has an example of [authentication with React Router v4](https://reacttraining.com/react-router/web/example/auth-workflow), but I highly recommend checking out [Tyler McGinnis's tutorial](https://tylermcginnis.com/react-router-protected-routes-authentication/) on building that example. His video is especially helpful, and we'll follow a similar path but with the addition of redux
 
 To learn the basics of Redux with React, take a read over [this tutorial](https://hackernoon.com/a-basic-react-redux-introductory-tutorial-adcc681eeb5e) by Miguel Moreno. The concepts we'll use here are `connect` and `mapStateToProps`.
 
@@ -275,3 +275,264 @@ Now head to your web browser and see if our authentication is working:
 ![Sign In / Sign Out](https://media.giphy.com/media/fituC7bTjxHyOkSSFe/giphy.gif)
 
 Awesome! Our AuthIndicator is showing us whether or not we are logged in, and our AuthButton lets us log in and log out. In a real app, this sign in process would probably involve verifying a token with your server, but this simplified version is enough for our routing purposes.
+
+## Lets Route!
+
+Now it's time to add in some routes. Lets use yarn to add `react-router-dom`:
+```bash
+yarn add react-router-dom
+```
+This package handles routing for browser projects, and not native or VR projects, but most of the code we use here today will apply to any of those three platforms.
+
+Lets create a file and make a few basic components in a `src/components/pages.js` file to use with our router:
+
+```javascript
+// src/components/pages.js
+
+import React from 'react'
+
+export const Public = () => <h3>Public</h3>
+export const Protected = () => <h3>Protected</h3>
+```
+
+To use the router, we'll need to provide the `BrowserRouter` (as `Router`) component from `react-router` at the root of our app. We'll set up our two pages using the `Route` component, and add `Links` to navigate to both routes.
+
+```javascript
+// src/App.js
+
+import React from 'react'
+import {Provider} from 'react-redux'
+import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
+import store from './redux/store'
+import AuthIndicator from './components/AuthIndicator'
+import AuthButton from './components/AuthButton'
+import {Public, Protected} from './components/pages'
+
+export default function App() {
+  return (
+    <Provider store={store}>
+      <Router>
+        <div style={{ padding: '20px' }}>
+          <AuthIndicator />
+          <AuthButton />
+          <ul>
+            <li><Link to="/public">Public Page</Link></li>
+            <li><Link to="/protected">Protected Page</Link></li>
+          </ul>
+          <Route path="/public" component={Public}/>
+          <Route path="/protected" component={Protected}/>
+        </div>
+      </Router>
+    </Provider>
+  )
+}
+```
+
+In our web browser, we can see that clicking on each link takes us to the corresponding page:
+
+![Page Navigation](https://media.giphy.com/media/3HEJPaOUBOfx34lUqe/giphy.gif)
+
+Great! But it looks like we can see the "Protected" page even when we aren't logged in... Lets change that.
+
+## Router, meet Redux
+
+First, lets create a "Switch" component that either renders a component or redirects the user. Lets put that component in `src/restrictedRouteMaker.js`
+
+```javascript
+// src/restrictedRouteMaker.js
+
+import React from 'react'
+import {Redirect} from 'react-router-dom'
+
+// HOC to either render the given component or redirect based on the `restricted` prop
+const RedirectSwitch = ({ component: Component, restricted, redirectPath, ...rest }) => (
+  restricted
+    ? <Redirect to={redirectPath}/>
+    : <Component {...rest}/>
+)
+```
+
+This is a Higher Order Component (HOC) that accepts a component to conditionally render as one of its props. If the `restricted` prop is true, that tells React-Router to send the user to the `to` route, much like a 304 redirect code from a server. We could use it in a route component like this:
+
+```javascript
+<Route path="/protected"
+  render={props => (
+    <RedirectSwitch restricted={isAuthed} redirectPath="/login" component={Protected} {...props}/>
+  )}
+/>
+```
+We're telling the `Route` component that if our user goes to the `/protected` route, we should render a `RedirectSwitch` that is restricted based on some `isAuthed` variable and redirect users to the `/login` route if they are are `restricted` or render the `Protected` if they are not.
+
+If that seemed a bit wordy to you, you've got a good sense of code overuse. This usage isn't re-usable and would be easy to mess up. Also note that since the `isAuthed` variable is coming from outside the component, it is not using redux well. Lets break this down into a few more straightforward steps.
+
+First we can see that our `RedirectSwitch` component requires at least three props: `component`, `restricted`, and `redirectPath`. These props will come from three different places. On the outermost layer, the API of our end component should be the same as `Route`, so the user can provide the `component` prop there. The `restricted` prop should be calculated from our state, so we'll want to use React-Redux's `connect` method and `mapStateToProps`. Finally, we can make our restricted routes more reusable if we inject the `redirectPath` prop with an HOC so the end user doesn't need to pass it every time.
+
+The `...rest` prop is just passed along to the `Component` as a spread operator, and it allows the user to pass props all the way from the `Route` to the rendered `Component`.
+
+First lets make a way to inject the `redirectPath`. We can wrap the `RedirectSwitch` component in another HOC to do just that:
+
+```javascript
+// src/restrictedRouteMaker.js
+
+// ...
+
+// Adds `redirectPath` as an HOC injected prop to a RedirectSwitch
+const addRedirectPathToSwitch = (redirectPath) => (props) => (
+  <RedirectSwitch redirectPath={redirectPath} {...props}/>
+)
+```
+
+The output of this HOC gives a `RedirectSwitch` that always redirects to the same place. For example, we could make a `LoginRestrictedSwitch` component that redirects to `/login` like this:
+
+```javascript
+const LoginRedirectSwitch = addRedirectPathToSwitch('/login');
+```
+
+Next, lets use `connect` to calculate our `restricted` prop from our state. We need to make a `mapStateToProps` function, so using our `LoginRedirectSwitch` as an example, we could do:
+```javascript
+const mapStateToAuthProps = ({auth: { isAuthed }}) => ({ restricted: isAuthed })
+const ConnectedLoginRedirectSwitch = connect(mapStateToAuthProps)(LoginRedirectSwitch)
+```
+This takes our `auth.isAuthed` prop and passes it into our switch component as the `restricted` prop.
+
+Finally, lets wrap our `connect`ed switch inside a route element:
+
+```javascript
+// src/restrictedRouteMaker.js
+
+// ...
+import {Route, Redirect} from 'react-router-dom'
+
+// ...
+const makeSwitchRoute = (SwitchComponent) => ({ path, component: RenderComponent, ...rest }) => (
+  <Route path={path} {...rest} render={props => <SwitchComponent component={RenderComponent} {...props}/>}/>
+)
+```
+
+This HOC allows us to take our `ConnectedLoginRedirectSwitch` component and nest it inside a React Router `Route` component so that the switch gets rendered when the `Route`'s path is matched. We could use it like this:
+
+```javascript
+const AuthRestrictedRoute = makeSwitchRoute(ConnectedLoginRedirectSwitch)
+// ...
+  <AuthRestrictedRoute path="/protected" component={Protected} />
+// ...
+```
+
+This component will match the `/protected` route and render the `Protected` component just like a normal `Route` if the user is logged in, and if they are not, it will redirect them to the `/login` route. Also, it's reusable! We could put another `AuthRestrictedRoute` right next to it:
+
+```javascript
+const AuthRestrictedRoute = makeSwitchRoute(ConnectedLoginRedirectSwitch)
+// ...
+  <AuthRestrictedRoute path="/protected" component={Protected} />
+  <AuthRestrictedRoute path="/secret" component={Secret} />
+// ...
+```
+
+Both routes are restricted to users that are logged in, and both will redirect to the `/login` page if the user tries to access the route before logging in. Isn't that cool?
+
+But we had to go through a lot of hoops to set up the `AuthRestrictedRoute` component. Could we make it easier by wrapping it all in one function? Yes!
+
+## Streamlining with Compose
+
+There are two props that we need to get before we can make the `AuthRestrictedRoute` component: the `redirectPath` and the `mapStateToProps`, so lets make a function that takes those two values as parameters:
+
+```javascript
+const restrictedRouteMaker = (redirectPath, mapStateToRestricted) => {
+  // ???
+}
+```
+
+Next, we can work our way from `RedirectSwitch` to `AuthRestrictedRoute` with each of the functions we wrote previously to build out this wrapper function:
+
+
+```javascript
+const restrictedRouteMaker = (redirectPath, mapStateToRestricted) => {
+  const LoginRedirectSwitch = addRedirectPathToSwitch('/login');
+  const mapStateToProps = ({auth: { isAuthed }}) => ({ restricted: isAuthed })
+  const ConnectedLoginRedirectSwitch = connect(mapStateToProps)(LoginRedirectSwitch)
+  const AuthRestrictedRoute = makeSwitchRoute(ConnectedLoginRedirectSwitch)
+
+  return AuthRestrictedRoute;
+}
+```
+
+This would work if we only wanted to make the `AuthRestrictedRoute` component, but we're interested in generalizing the process. Lets use the parameters we passed in to do that:
+
+```javascript
+const restrictedRouteMaker = (redirectPath, mapStateToRestricted) => {
+  const RedirectSwitchWithPath = addRedirectPathToSwitch(redirectPath);
+  const ConnectedRedirectSwitchWithPath = connect(mapStateToRestricted)(RedirectSwitchWithPath)
+  return makeSwitchRoute(ConnectedRedirectSwitchWithPath)
+}
+```
+
+And we could use this function to make our `AuthRestrictedRoute`:
+
+```javascript
+const AuthRestrictedRoute = restrictedRouteMaker('/login', ({auth: { isAuthed }}) => ({ restricted: isAuthed }))
+```
+
+Or we could build a route that is only available to people who *aren't* authed:
+
+```javascript
+const NoAuthRestrictedRoute = restrictedRouteMaker('/home', ({auth: { isAuthed }}) => ({ restricted: !isAuthed }))
+```
+
+We could even build a route that isn't available Jim who sits down the hall from you:
+
+```javascript
+const NoJimRoute = restrictedRouteMaker('/home', ({user: { email }}) => ({ restricted: email === 'jim@company.com' }))
+```
+
+But we can do even better! Notice that the `restrictedRouteMaker` is just a series of functions called with the result of the previous function. That's exactly what the `compose` function from Redux was made for. It is a method that takes a series of functions and returns a function that calls them on each other from right to left, exposing the rightmost function as the input to the returned function. Lets add a composed version of `restrictedRouteMaker` to our `src/restrictedRouteMaker.js` file:
+
+```javascript
+// src/restrictedRouteMaker.js
+
+// ...
+import {connect, Provider} from 'react-redux'
+import {compose} from 'redux'
+
+// ...
+
+const restrictedRouteMaker = (redirectPath, mapStateToRestricted) => compose(
+  makeSwitchRoute,
+  connect(mapStateToRestricted),
+  addRedirectPathToSwitch
+)(redirectPath)
+```
+
+Here's the entire `restrictedRouteMaker.js` file:
+
+```javascript
+// src/restrictedRouteMaker.js
+
+import React from 'react'
+import {connect, Provider} from 'react-redux'
+import {compose} from 'redux'
+import {Route, Redirect} from 'react-router-dom'
+
+// HOC to either render the given component or redirect based on the `restricted` prop
+const RedirectSwitch = ({ component: Component, restricted, redirectPath, ...rest }) => (
+  restricted
+    ? <Redirect to={redirectPath}/>
+    : <Component {...rest}/>
+)
+
+// Adds `redirectPath` as an HOC injected prop to a RedirectSwitch
+const addRedirectPathToSwitch = (redirectPath) => (props) => (
+  <RedirectSwitch redirectPath={redirectPath} {...props}/>
+)
+
+// Component factory to wrap SwitchComponent inside a react-router Route
+const makeSwitchRoute = (SwitchComponent) => ({ path, component: RenderComponent, ...rest }) => (
+  <Route path={path} {...rest} render={props => <SwitchComponent component={RenderComponent} {...props}/>}/>
+)
+
+// Wraps all our other components in a HOC factory function
+export default (redirectPath, mapStateToRestricted) => compose(
+  makeSwitchRoute,
+  connect(mapStateToRestricted),
+  addRedirectPathToSwitch
+)(redirectPath)
+```
