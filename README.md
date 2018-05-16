@@ -76,36 +76,43 @@ export const Logout = () => <h3>Logout</h3>
 
 To use the router, we'll need to provide the `BrowserRouter` (as `Router`) component from `react-router` at the root of our app. We'll set up our two pages using the `Route` component, and add `Links` to navigate to both routes. Go ahead and replace the contents of `src/App.js` with a basic routing component:
 
+[comment]: <> (App1)
+
 ```javascript
 // src/App.js
 
 import React from 'react'
 import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
+import {Home, Public, Protected, Login, Logout} from './components/pages'
 
 export default function App() {
   return (
-    <Router>
-      <div style={{ padding: '20px' }}>
-        <ul>
-          <li><Link to="/">Home</Link></li>
-          <li><Link to="/login">Login Page</Link></li>
-          <li><Link to="/logout">Logout Page</Link></li>
-        </ul>
-        <Route exact={true} path="/" component={() => <h3>Home</h3>}/>
-        <Route path="/login" component={() => <h3>Login</h3>}/>
-        <Route path="/logout" component={() => <h3>Logout</h3>}/>
-      </div>
-    </Router>
+      <Router>
+        <div style={{ padding: '20px' }}>
+          <ul>
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/public">Public Page</Link></li>
+            <li><Link to="/protected">Protected Page</Link></li>
+            <li><Link to="/login">Login Page</Link></li>
+            <li><Link to="/logout">Logout Page</Link></li>
+          </ul>
+          <Route exact={true} path="/" component={() => <h3>Home</h3>}/>
+          <Route path="/public" component={() => <h3>Public</h3>}/>
+          <Route path="/protected" component={() => <h3>Protected</h3>}/>
+          <Route path="/login" component={() => <h3>Login</h3>}/>
+          <Route path="/logout" component={() => <h3>Logout</h3>}/>
+        </div>
+      </Router>
   )
 }
 ```
 
 Now let's head over to the browser and we'll see that we can route between our mini `Home`, `Login` and `Logout` pages!
 
-TODO: make video of mini routing
+TODO: make video of mini routing for App1
 ![Mini Routes](https://gph.to/2InucEq)
 
-These pages don't actually log us in or out, but we'll be able to fix that after we add Redux
+The `Login` and `Logout` pages don't actually log us in or out, but we'll be able to fix that after we add Redux
 
 ## Initializing Redux
 
@@ -202,6 +209,8 @@ yarn add react-redux
 
 This package gives us the `Provider` component that lets components within our app access our store. Add this wrapper around the App:
 
+[comment]: <> (App2)
+
 ```javascript
 // src/App.js
 
@@ -217,10 +226,14 @@ export default function App() {
         <div style={{ padding: '20px' }}>
           <ul>
             <li><Link to="/">Home</Link></li>
+            <li><Link to="/public">Public Page</Link></li>
+            <li><Link to="/protected">Protected Page</Link></li>
             <li><Link to="/login">Login Page</Link></li>
             <li><Link to="/logout">Logout Page</Link></li>
           </ul>
           <Route exact={true} path="/" component={() => <h3>Home</h3>}/>
+          <Route path="/public" component={() => <h3>Public</h3>}/>
+          <Route path="/protected" component={() => <h3>Protected</h3>}/>
           <Route path="/login" component={() => <h3>Login</h3>}/>
           <Route path="/logout" component={() => <h3>Logout</h3>}/>
         </div>
