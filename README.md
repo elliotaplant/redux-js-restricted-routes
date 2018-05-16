@@ -702,6 +702,7 @@ If we head over to the browser we'll see that if we try to go to the `Protected`
 ## Conclusion
 
 By making a Higher Order Component that connects our routes to our redux store, we're able to restrict access to parts of our app based on our redux state. As we just saw, this is super useful for authentication, but it can easily be extended to other restrictions. What if you want to make a route restricted if a user hasn't complimented your hair? Thats as simple as:
+
 ```javascript
 const mapStateToComplimentProps = ({user: { hasComplimentedMyHair }}) => ({ restricted: !hasComplimentedMyHair })
 const HairComplimentRestrictedRoute = restrictedRouteMaker('/not-fabulous', mapStateToComplimentProps)
@@ -709,4 +710,5 @@ const HairComplimentRestrictedRoute = restrictedRouteMaker('/not-fabulous', mapS
   <HairComplimentRestrictedRoute path="/fabulous" component={SuperMegaDiscount} />
 // ...
 ```
+
 The possibilities are endless. Now go restrict your users with confidence!
