@@ -8,7 +8,7 @@ import store from './redux/store'
 import AuthIndicator from './components/AuthIndicator'
 import Login from './components/Login' // Add import to new file
 import Logout from './components/Logout' // Add import to new file
-import {restrictedRouteMaker} from './restrictedRouteMaker'
+import restrictedRouteMaker from './restrictedRouteMaker'
 
 // Create route with auth restriction that redirects to /login
 const mapStateToAuthProps = ({auth: { isAuthed }}) => ({ restricted: !isAuthed })

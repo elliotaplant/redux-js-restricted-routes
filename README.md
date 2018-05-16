@@ -79,13 +79,37 @@ To use the router, we'll need to provide the `BrowserRouter` (as `Router`) compo
 [comment]: <> (App1)
 
 ```javascript
-// TODO: Add code
+// src/App.js
+
+import React from 'react'
+import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
+import {Home, Public, Protected, Login, Logout} from './components/pages'
+
+export default function App() {
+  return (
+      <Router>
+        <div style={{ padding: '20px' }}>
+          <ul>
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/public">Public Page</Link></li>
+            <li><Link to="/protected">Protected Page</Link></li>
+            <li><Link to="/login">Login Page</Link></li>
+            <li><Link to="/logout">Logout Page</Link></li>
+          </ul>
+          <Route exact={true} path="/" component={Home}/>
+          <Route path="/public" component={Public}/>
+          <Route path="/protected" component={Protected}/>
+          <Route path="/login" component={Login}/>
+          <Route path="/logout" component={Logout}/>
+        </div>
+      </Router>
+  )
+}
 ```
 
-Now let's head over to the browser and we'll see that we can route between our mini `Home`, `Login` and `Logout` pages!
+Now let's head over to the browser and we'll see that we can route between our simple pages!
 
-TODO: make video of mini routing for App1
-![Mini Routes](https://gph.to/2InucEq)
+![Mini Routes](https://media.giphy.com/media/PoHVYJ5V733gvdrZYy/giphy.gif)
 
 The `Login` and `Logout` pages don't actually log us in or out, but we'll be able to fix that after we add Redux
 
@@ -187,7 +211,36 @@ This package gives us the `Provider` component that lets components within our a
 [comment]: <> (App2)
 
 ```javascript
-// TODO: Add code
+// src/App.js
+
+import React from 'react'
+import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
+import {Home, Public, Protected, Login, Logout} from './components/pages'
+import {Provider} from 'react-redux'
+import store from './redux/store'
+
+export default function App() {
+  return (
+    <Provider store={store}>
+      <Router>
+        <div style={{ padding: '20px' }}>
+          <ul>
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/public">Public Page</Link></li>
+            <li><Link to="/protected">Protected Page</Link></li>
+            <li><Link to="/login">Login Page</Link></li>
+            <li><Link to="/logout">Logout Page</Link></li>
+          </ul>
+          <Route exact={true} path="/" component={Home}/>
+          <Route path="/public" component={Public}/>
+          <Route path="/protected" component={Protected}/>
+          <Route path="/login" component={Login}/>
+          <Route path="/logout" component={Logout}/>
+        </div>
+      </Router>
+    </Provider>
+  )
+}
 ```
 
 Nothing should change about the way the app looks, but if the app compiles then that's a good sign.
@@ -227,16 +280,44 @@ export default connect(mapAuthStateToProps)(AuthIndicator)
 
 Now that our AuthIndicator knows about our redux store, let's add it to the app:
 
-[comment]: <> (App3)
-
 ```javascript
-// TODO: Add code
+// src/App.js
+
+import React from 'react'
+import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
+import {Home, Public, Protected, Login, Logout} from './components/pages'
+import {Provider} from 'react-redux'
+import store from './redux/store'
+import AuthIndicator from './components/AuthIndicator'
+
+export default function App() {
+  return (
+    <Provider store={store}>
+      <Router>
+        <div style={{ padding: '20px' }}>
+          <AuthIndicator />
+          <ul>
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/public">Public Page</Link></li>
+            <li><Link to="/protected">Protected Page</Link></li>
+            <li><Link to="/login">Login Page</Link></li>
+            <li><Link to="/logout">Logout Page</Link></li>
+          </ul>
+          <Route exact={true} path="/" component={Home}/>
+          <Route path="/public" component={Public}/>
+          <Route path="/protected" component={Protected}/>
+          <Route path="/login" component={Login}/>
+          <Route path="/logout" component={Logout}/>
+        </div>
+      </Router>
+    </Provider>
+  )
+}
 ```
 
 Checking out our browser, we see a wonderful un-welcome message:
 
-TODO: get new unwelcome image
-![Unwelcome](https://i.imgur.com/Kk6gNz0.png)
+![Unwelcome](https://i.imgur.com/MIPyn7B.png)
 
 Perfect! The app knows that we aren't logged in. Lets add a way to change that.
 
@@ -293,7 +374,40 @@ Lets add our new components to our App in `/src/App.js`:
 [comment]: <> (App4)
 
 ```javascript
-// TODO: Add code
+// src/App.js
+
+import React from 'react'
+import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
+import {Home, Public, Protected} from './components/pages' // Remove Login, Logout
+import {Provider} from 'react-redux'
+import store from './redux/store'
+import AuthIndicator from './components/AuthIndicator'
+import Login from './components/Login' // Add import to new file
+import Logout from './components/Logout' // Add import to new file
+
+export default function App() {
+  return (
+    <Provider store={store}>
+      <Router>
+        <div style={{ padding: '20px' }}>
+          <AuthIndicator />
+          <ul>
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/public">Public Page</Link></li>
+            <li><Link to="/protected">Protected Page</Link></li>
+            <li><Link to="/login">Login Page</Link></li>
+            <li><Link to="/logout">Logout Page</Link></li>
+          </ul>
+          <Route exact={true} path="/" component={Home}/>
+          <Route path="/public" component={Public}/>
+          <Route path="/protected" component={Protected}/>
+          <Route path="/login" component={Login}/>
+          <Route path="/logout" component={Logout}/>
+        </div>
+      </Router>
+    </Provider>
+  )
+}
 ```
 Now head to your web browser and see if our authentication is working:
 
@@ -518,17 +632,72 @@ export default (redirectPath, mapStateToRestricted) => compose(
 
 Now we can use our route factory to make some restricted routes! Back in App.js, let's make two restricted routes, one for authed routes and one for non-authed routes:
 ```javascript
-// TODO: Add code (top)
+// src/App.js
+
+// ...
+import restrictedRouteMaker from './restrictedRouteMaker'
+
+// Create route with auth restriction that redirects to /login
+const mapStateToAuthProps = ({auth: { isAuthed }}) => ({ restricted: !isAuthed })
+const AuthRestrictedRoute = restrictedRouteMaker('/login', mapStateToAuthProps)
+
+// Create route with no-auth restriction that redirects to home
+const mapStateToNoAuthProps = ({auth: { isAuthed }}) => ({ restricted: isAuthed })
+const NoAuthRestrictedRoute = restrictedRouteMaker('/', mapStateToNoAuthProps)
+
+// ...
 ```
 
 Now, let's use our routes to fix the permissions on our `Login`, `Protected` and `Logout` pages:
 ```javascript
-// TODO: Add code (bottom)
+// src/App.js
+
+import React from 'react'
+import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
+import {Home, Public, Protected} from './components/pages' // Remove Login, Logout
+import {Provider} from 'react-redux'
+import store from './redux/store'
+import AuthIndicator from './components/AuthIndicator'
+import Login from './components/Login' // Add import to new file
+import Logout from './components/Logout' // Add import to new file
+import restrictedRouteMaker from './restrictedRouteMaker'
+
+// Create route with auth restriction that redirects to /login
+const mapStateToAuthProps = ({auth: { isAuthed }}) => ({ restricted: !isAuthed })
+const AuthRestrictedRoute = restrictedRouteMaker('/login', mapStateToAuthProps)
+
+// Create route with no-auth restriction that redirects to home
+const mapStateToNoAuthProps = ({auth: { isAuthed }}) => ({ restricted: isAuthed })
+const NoAuthRestrictedRoute = restrictedRouteMaker('/', mapStateToNoAuthProps)
+
+export default function App() {
+  return (
+    <Provider store={store}>
+      <Router>
+        <div style={{ padding: '20px' }}>
+          <AuthIndicator />
+          <ul>
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/public">Public Page</Link></li>
+            <li><Link to="/protected">Protected Page</Link></li>
+            <li><Link to="/login">Login Page</Link></li>
+            <li><Link to="/logout">Logout Page</Link></li>
+          </ul>
+          <Route exact={true} path="/" component={Home}/>
+          <Route path="/public" component={Public}/>
+          <AuthRestrictedRoute path="/protected" component={Protected}/>
+          <NoAuthRestrictedRoute path="/login" component={Login}/>
+          <AuthRestrictedRoute path="/logout" component={Logout}/>
+        </div>
+      </Router>
+    </Provider>
+  )
+}
 ```
 
 If we head over to the browser we'll see that if we try to go to the `Protected` or `Logout` pages before logging in, we get redirected to the `Login` page! And conversely, if we try to go to the `Login` page when we're already logged in, we get redirected to the `Home` page. Sweet.
 
-// TODO: Make video of trying to navigate with/without logins
+![Restricted Navigation](https://media.giphy.com/media/jInFVdtZ8TJlQ2Mn8y/giphy.gif)
 
 ## Conclusion
 
