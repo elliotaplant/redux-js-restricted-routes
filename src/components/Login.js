@@ -1,8 +1,10 @@
 // src/components/Login.js
+
 import React from 'react'
 import {connect} from 'react-redux'
 import {logInUser} from '../redux/actions'
 
+// A functional component that requires a logInUser function as a parameter
 const Login = ({ logInUser }) => (
   <div>
     <h3>Login</h3>
