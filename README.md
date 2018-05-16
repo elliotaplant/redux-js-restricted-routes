@@ -5,7 +5,7 @@ Often times we need to hide certain parts of our web apps from users who aren't 
 
 In complex applications, we might restrict content based on tiered authorization levels. A basic user shouldn't have access to the admin panel, but an admin should be able to view everything. In even *more* complex applications, we could restrict content based on an a set of access permissions. A designer might be allowed to edit code, and an engineer might not be allowed to edit designs.
 
-All of these restrictions are based on the authentication state of our application. If we're using Redux, that state should be in our application's Redux-store. Wouldn't it be cool if we could make our application automatically restrict users from accessing content based on their authorization state in our redux store?
+All of these restrictions are based on the authentication state of our application. If we're using Redux, that state should be in our application's Redux store. Wouldn't it be cool if we could make our application automatically restrict users from accessing content based on the authorization state in our Redux store?
 
 ## #CodeGoals
 We want to make React components that act like React Router's `<Route />` component but are connected to our Redux store and redirect users to a safe place if they try to access restricted content.
@@ -29,11 +29,11 @@ To get the most out of this tutorial, you should have some basic familiarity wit
 
 React Training has an example of [authentication with React Router v4](https://reacttraining.com/react-router/web/example/auth-workflow), but I highly recommend checking out [Tyler McGinnis's tutorial](https://tylermcginnis.com/react-router-protected-routes-authentication/) on building that example. His video is especially helpful, and we'll follow a similar path but with the addition of redux
 
-To learn the basics of Redux with React, take a read over [this tutorial](https://hackernoon.com/a-basic-react-redux-introductory-tutorial-adcc681eeb5e) by Miguel Moreno. The concepts we'll use here are `connect` and `mapStateToProps`.
+To learn the basics of Redux with React, take a read over [this tutorial](https://hackernoon.com/a-basic-react-redux-introductory-tutorial-adcc681eeb5e) by Miguel Moreno. The concepts we'll use here are `connect`, `mapStateToProps`, and `mapDispatchToProps`.
 
 ## TL;DR
 
-The final code from this tutorial is available at the bottom of the page and on [my github](https://github.com/elliotaplant/redux-js-restricted-routes).
+The final code from this tutorial is available on [my github page](https://github.com/elliotaplant/redux-js-restricted-routes). Feel free to fork it and, if you find any bugs, make a pull request!
 
 ## Setup
 
@@ -58,7 +58,7 @@ Now it's time to add in some routes. Lets use yarn to add `react-router-dom`:
 ```bash
 yarn add react-router-dom
 ```
-This package handles routing for browser projects, but most of the code we use here today will apply to React Native or React VR projects.
+This package handles routing for browser projects, but most of the code we use here today will apply to React Native and React VR projects as well.
 
 Before we start routing, we'll need to make some components to route *to*. Make a file called `src/components/pages.js` and add these five components:
 
@@ -74,9 +74,7 @@ export const Login = () => <h3>Login</h3>
 export const Logout = () => <h3>Logout</h3>
 ```
 
-To use the router, we'll need to provide the `BrowserRouter` (as `Router`) component from `react-router` at the root of our app. We'll set up our two pages using the `Route` component, and add `Links` to navigate to both routes. Go ahead and replace the contents of `src/App.js` with a basic routing component:
-
-[comment]: <> (App1)
+To use the router, we'll need to provide the `BrowserRouter` (as `Router`) component from `react-router` at the root of our app. We'll set up routes to our pages using the `Route` component, and add `Links` to navigate to them. Go ahead and replace the contents of `src/App.js` with a basic routing component:
 
 ```javascript
 // src/App.js
@@ -115,7 +113,7 @@ The `Login` and `Logout` pages don't actually log us in or out, but we'll be abl
 
 ## Initializing Redux
 
-The first thing we'll add to our project is Redux to manage the logged in/out state. Go ahead and run
+Redux is a simple but powerful state management tool that we will use to manage our logged in/out state. Go ahead and add Redux to the project with:
 ```bash
 yarn add redux
 ```
@@ -130,7 +128,7 @@ export const LOG_IN_USER = 'LOG_IN_USER'
 export const LOG_OUT_USER = 'LOG_OUT_USER'
 ```
 
-Since the only state we care about is whether the user is logged in or not, these are the only actions we need.
+Since the only state we care about is whether the user is logged in or not, these are the only actions we'll need.
 
 To make things easier for our future selves, let's make some action creator functions to facilitate the logging in/out process and add them to the `src/redux/actions.js` file:
 ```javascript
@@ -178,7 +176,7 @@ export function authReducer(state = { isAuthed: false }, action) {
 
 All this reducer does is update the `isAuthed` part of our state when it sees the `LOG_IN_USER` and `LOG_OUT_USER` actions.
 
-Finally, let's use this reducer to make a store. Create a `store.js` file in the `src/redux` folder and initialize the store with our reducer.
+Finally, let's use this reducer to make a store. Create a `store.js` file in the `src/redux` folder and initialize the store with our reducer:
 
 ```javascript
 // src/redux/store.js
@@ -195,20 +193,18 @@ const store = createStore(reducers)
 export default store
 ```
 
-This file uses the `createStore` methods of redux to make a Redux store out of our auth reducer. Using `combineReducers` function is overkill here, but in your future apps, you'll probably have more than one reducer.
+This file uses the `createStore` methods of redux to make a Redux store out of our auth reducer. Using the `combineReducers` function is overkill here, but in your future apps, you'll probably have more than one reducer.
 
 We'll export this store so that we can connect it to redux with the `react-redux` package.
 
 ## Connecting Redux to React
 
-Luckily for us, the `react-redux` npm package will do all the heavy lifting we need to make our React app aware of our Redux store. Add the package to your project by running:
+Luckily for us, the `react-redux` npm package will do all the heavy lifting we need to make our React app aware of our Redux store. Add this package to the project by running:
 ```bash
 yarn add react-redux
 ```
 
-This package gives us the `Provider` component that lets components within our app access our store. Add this wrapper around the App:
-
-[comment]: <> (App2)
+This package gives us the `Provider` component that lets components within our app access our store. Add the `Provider` inside your `App` component:
 
 ```javascript
 // src/App.js
@@ -216,12 +212,12 @@ This package gives us the `Provider` component that lets components within our a
 import React from 'react'
 import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
 import {Home, Public, Protected, Login, Logout} from './components/pages'
-import {Provider} from 'react-redux'
-import store from './redux/store'
+import {Provider} from 'react-redux' // Don't forget the import!
+import store from './redux/store' // Import store too
 
 export default function App() {
   return (
-    <Provider store={store}>
+    <Provider store={store}> {/* <- Here */}
       <Router>
         <div style={{ padding: '20px' }}>
           <ul>
@@ -243,7 +239,7 @@ export default function App() {
 }
 ```
 
-Nothing should change about the way the app looks, but if the app compiles then that's a good sign.
+Nothing should change about the way the app looks, but so long as your project still compiles, you're on the right track.
 
 Now let's get some indication of our logged in status. Make a `src/components` folder then create a file called `AuthIndicator.js` with this JSX component:
 
@@ -278,7 +274,7 @@ const mapAuthStateToProps = ({auth: { isAuthed }}) => ({isAuthed})
 export default connect(mapAuthStateToProps)(AuthIndicator)
 ```
 
-Now that our AuthIndicator knows about our redux store, let's add it to the app:
+Now that our AuthIndicator knows about our Redux store, let's add it to the app:
 
 ```javascript
 // src/App.js
@@ -288,14 +284,14 @@ import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
 import {Home, Public, Protected, Login, Logout} from './components/pages'
 import {Provider} from 'react-redux'
 import store from './redux/store'
-import AuthIndicator from './components/AuthIndicator'
+import AuthIndicator from './components/AuthIndicator' // Don't forget the import!
 
 export default function App() {
   return (
     <Provider store={store}>
       <Router>
         <div style={{ padding: '20px' }}>
-          <AuthIndicator />
+          <AuthIndicator /> {/* <- Here */}
           <ul>
             <li><Link to="/">Home</Link></li>
             <li><Link to="/public">Public Page</Link></li>
@@ -371,8 +367,6 @@ You'll probably notice that this component is very similar to the `Login` compon
 
 Lets add our new components to our App in `/src/App.js`:
 
-[comment]: <> (App4)
-
 ```javascript
 // src/App.js
 
@@ -411,15 +405,17 @@ export default function App() {
 ```
 Now head to your web browser and see if our authentication is working:
 
-![Sign In / Sign Out](https://gph.to/2IpueHD)
+![Sign In / Sign Out](https://media.giphy.com/media/1BGPAfiZvO4qKnTT6S/giphy.gif)
 
-Awesome! Our `AuthIndicator` is showing us whether or not we are logged in, and our `Login` and `Logout` components lets us log in and log out. In a real app, this sign in process would probably involve verifying a token with your server, but this simplified version is enough for our routing purposes.
+Awesome! Our `AuthIndicator` is showing us whether or not we are logged in, and our `Login` and `Logout` components let us log in and log out. In a real app, this sign in process would probably involve verifying a token with your server, but this simplified version is enough for our routing purposes.
 
 One glaring flaw is that we can go to the `/logout` and `/protected` pages even if we aren't logged in... let's change that.
 
 ## Router, meet Redux
 
-First, let's create a "Switch" component that either renders a component or redirects the user. We'll use `react-router-dom`'s `Redirect` component which, when rendered, simply redirects the user to the `to` route, much like a 304 redirect code from a server. Lets put that component in a new file called `src/restrictedRouteMaker.js`:
+Finally, what we've all been waiting for! It's time to hook up our Router to Redux.
+
+Let's create a "Switch" component that either renders a provided component or redirects the user. We'll use `react-router-dom`'s `Redirect` component which, when rendered, simply redirects the user to the `to` route, much like a 304 redirect code from a server. Lets put that component in a new file called `src/restrictedRouteMaker.js`:
 
 ```javascript
 // src/restrictedRouteMaker.js
@@ -427,7 +423,7 @@ First, let's create a "Switch" component that either renders a component or redi
 import React from 'react'
 import {Redirect} from 'react-router-dom'
 
-// HOC to either render the given component or redirect based on the `restricted` prop
+// HOC to either render the given component or redirects based on the `restricted` prop
 const RedirectSwitch = ({ component: Component, restricted, redirectPath, ...rest }) => (
   restricted
     ? <Redirect to={redirectPath}/>
@@ -435,7 +431,7 @@ const RedirectSwitch = ({ component: Component, restricted, redirectPath, ...res
 )
 ```
 
-This is a Higher Order Component (HOC) that accepts a component to conditionally render as one of its props. If the `restricted` prop is `true`, we render the redirect and thus redirect the user. If `restricted` is `false`, we render the component without any changes. We could use this new component in a route component like this:
+This is a Higher Order Component (HOC) that accepts a component to conditionally render as one of its props. If the `restricted` prop is `true`, we render the `Redirect` and thus redirect the user. If `restricted` is `false`, we render the `Component` without any changes. We could use this new component in a `Route` component like this:
 
 ```javascript
 <Route path="/protected"
@@ -454,7 +450,7 @@ First we can see that our `RedirectSwitch` component requires at least three pro
 
 The `...rest` prop is just passed along to the `Component` as a spread operator, and it allows the user to pass props all the way from the `Route` to the rendered `Component`.
 
-First let's make a way to inject the `redirectPath`. We can wrap the `RedirectSwitch` component in another HOC to do just that:
+Let's make the HOC to inject the `redirectPath`. We can wrap the `RedirectSwitch` component in another HOC to do just that:
 
 ```javascript
 // src/restrictedRouteMaker.js
@@ -533,7 +529,7 @@ const restrictedRouteMaker = () => {
 ```
 This would work if we only wanted to make the `AuthRestrictedRoute` component, but we're interested in generalizing the process.
 
-There are really only two values that we need to get before we can make any `*RestrictedRoute` component: the `redirectPath` and the `mapStateToProps`, so let's make our function accept those two values as parameters:
+There are really only two unique values that we need to make a `RestrictedRoute` component: the `redirectPath` and the `mapStateToProps`, so let's make our factory function accept those two values as parameters:
 
 ```javascript
 const restrictedRouteMaker = (redirectPath, mapStateToRestricted) => {
@@ -565,16 +561,16 @@ const AuthRestrictedRoute = restrictedRouteMaker('/login', ({auth: { isAuthed }}
 Or we could build a route that is only available to people who *aren't* authed:
 
 ```javascript
-const NoAuthRestrictedRoute = restrictedRouteMaker('/home', ({auth: { isAuthed }}) => ({ restricted: !isAuthed }))
+const NoAuthRestrictedRoute = restrictedRouteMaker('/', ({auth: { isAuthed }}) => ({ restricted: !isAuthed }))
 ```
 
-We could even build a route that isn't available Jim who in the desk next to you:
+We could even build a route that isn't available Jim who sits at the desk down the hall:
 
 ```javascript
 const NoJimRoute = restrictedRouteMaker('/somewhere', ({user: { email }}) => ({ restricted: email === 'jim@company.com' }))
 ```
 
-But we can do even better! Notice that the `restrictedRouteMaker` is just a series of functions called with the result of the previous function. That's exactly what the `compose` function from Redux was made for. It's a method that takes a series of functions and returns a function that calls them on each other from right to left, exposing the rightmost function as the input to the returned function. Lets add a composed version of `restrictedRouteMaker` to our `src/restrictedRouteMaker.js` file:
+But we can do even better! Notice that the `restrictedRouteMaker` is just a series of functions called with the result of the previous function. That's exactly what the `compose` function from Redux was made for. It's a method that takes a series of functions and returns a function that calls them on each other from right to left, exposing the rightmost function as the input to the returned function. Let's add a composed version of `restrictedRouteMaker` to our `src/restrictedRouteMaker.js` file:
 
 ```javascript
 // src/restrictedRouteMaker.js
@@ -641,7 +637,7 @@ import restrictedRouteMaker from './restrictedRouteMaker'
 const mapStateToAuthProps = ({auth: { isAuthed }}) => ({ restricted: !isAuthed })
 const AuthRestrictedRoute = restrictedRouteMaker('/login', mapStateToAuthProps)
 
-// Create route with no-auth restriction that redirects to home
+// Create route with no-auth restriction that redirects to /
 const mapStateToNoAuthProps = ({auth: { isAuthed }}) => ({ restricted: isAuthed })
 const NoAuthRestrictedRoute = restrictedRouteMaker('/', mapStateToNoAuthProps)
 
@@ -695,13 +691,13 @@ export default function App() {
 }
 ```
 
-If we head over to the browser we'll see that if we try to go to the `Protected` or `Logout` pages before logging in, we get redirected to the `Login` page! And conversely, if we try to go to the `Login` page when we're already logged in, we get redirected to the `Home` page. Sweet.
+If we head over to the browser we'll see that if we try to go to the `Protected` or `Logout` pages before logging in, we get redirected to the `Login` page! And conversely, if we try to go to the `Login` page when we're already logged in, we get redirected to the `Home` page. These new routes sit right beside regular, unrestricted `Route`s and behave the same with the addition of our restrictions. Sweet.
 
 ![Restricted Navigation](https://media.giphy.com/media/jInFVdtZ8TJlQ2Mn8y/giphy.gif)
 
 ## Conclusion
 
-By making a Higher Order Component that connects our routes to our redux store, we're able to restrict access to parts of our app based on our redux state. As we just saw, this is super useful for authentication, but it can easily be extended to other restrictions. What if you want to make a route restricted if a user hasn't complimented your hair? Thats as simple as:
+By making a higher order component factory that connects our routes to our Redux store, we're able to restrict access to parts of our app based directly on our redux state. As we just saw, this is super useful for authentication, but it can easily be extended to other restrictions. What if you want to make a route restricted for a users who haven't complimented your hair? That's as simple as:
 
 ```javascript
 const mapStateToComplimentProps = ({user: { hasComplimentedMyHair }}) => ({ restricted: !hasComplimentedMyHair })
